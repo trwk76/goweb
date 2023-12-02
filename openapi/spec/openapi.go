@@ -1,4 +1,4 @@
-package v310
+package spec
 
 type (
 	OpenAPI struct {
@@ -91,4 +91,4 @@ type (
 	}
 )
 
-const Version string = "3.1.0"
+const Version string = "3.0.3"

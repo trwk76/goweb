@@ -1,4 +1,4 @@
-package v310
+package spec
 
 import (
 	"encoding/json"
@@ -15,11 +15,12 @@ type (
 		AllOf                []Schema              `json:"allOf,omitempty" yaml:"allOf,omitempty"`
 		Type                 SchemaType            `json:"type,omitempty" yaml:"type,omitempty"`
 		Format               SchemaFormat          `json:"format,omitempty" yaml:"format,omitempty"`
+		Nullable             bool                  `json:"nullable,omitempty" yaml:"nullable,omitempty"`
 		Enum                 []any                 `json:"enum,omitempty" yaml:"enum,omitempty"`
 		Minimum              *float64              `json:"minimum,omitempty" yaml:"minimum,omitempty"`
-		ExclusiveMinimum     *float64              `json:"exclusiveMinimum,omitempty" yaml:"exclusiveMinimum,omitempty"`
+		ExclusiveMinimum     bool                  `json:"exclusiveMinimum,omitempty" yaml:"exclusiveMinimum,omitempty"`
 		Maximum              *float64              `json:"maximum,omitempty" yaml:"maximum,omitempty"`
-		ExclusiveMaximum     *float64              `json:"exclusiveMaximum,omitempty" yaml:"exclusiveMaximum,omitempty"`
+		ExclusiveMaximum     bool                  `json:"exclusiveMaximum,omitempty" yaml:"exclusiveMaximum,omitempty"`
 		MultipleOf           float64               `json:"multipleOf,omitempty" yaml:"multipleOf,omitempty"`
 		MinLength            uint32                `json:"minLength,omitempty" yaml:"minLength,omitempty"`
 		MaxLength            uint32                `json:"maxLength,omitempty" yaml:"maxLength,omitempty"`
@@ -72,6 +73,8 @@ const (
 )
 
 const (
+	SchemaFormatBinary              SchemaFormat = "binary"
+	SchemaFormatBase64              SchemaFormat = "base64"
 	SchemaFormatDate                SchemaFormat = "date"
 	SchemaFormatTime                SchemaFormat = "time"
 	SchemaFormatDateTime            SchemaFormat = "date-time"

@@ -1,4 +1,4 @@
-package v310
+package spec
 
 type (
 	Paths map[string]PathItem
