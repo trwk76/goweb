@@ -12,7 +12,19 @@ type (
 		name string
 		spec spec.SecurityScheme
 	}
+
+	AuthReqs []AuthReq
+
+	AuthReq map[string][]string
 )
+
+func NewAuthReq() AuthReq {
+	return make(AuthReq)
+}
+
+func (a AuthReq) Add(auth Auth, roles []string) {
+	a[auth.name] = roles
+}
 
 func (a Auths) Name(name string) *Auth {
 	for _, itm := range a {
@@ -34,4 +46,14 @@ func (a *Auths) Add(auth Auth) {
 
 func (a Auth) Name() string {
 	return a.name
+}
+
+func (a Auths) Spec() spec.NamedSecuritySchemes {
+	res := make(spec.NamedSecuritySchemes)
+
+	for _, item := range a {
+		res[item.name] = item.spec
+	}
+
+	return res
 }
