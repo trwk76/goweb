@@ -12,9 +12,10 @@ func New(path string, info spec.Info, mtyp MediaTypes) Builder {
 
 type (
 	Builder struct {
-		Auths Auths
-		path  string
-		mtyp  MediaTypes
-		info  spec.Info
+		Path       string
+		Info       spec.Info
+		MediaTypes MediaTypes
+		Auths      Auths
+		Responses  Responses
 	}
 )
