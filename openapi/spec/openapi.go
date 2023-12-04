@@ -1,5 +1,33 @@
 package spec
 
+import (
+	"encoding/json"
+
+	"gopkg.in/yaml.v3"
+)
+
+func ParseJSON(raw []byte) (OpenAPI, error) {
+	res := OpenAPI{}
+	err := json.Unmarshal(raw, &res)
+	return res, err
+}
+
+func ParseYAML(raw []byte) (OpenAPI, error) {
+	res := OpenAPI{}
+	err := yaml.Unmarshal(raw, &res)
+	return res, err
+}
+
+func (o *OpenAPI) JSON() []byte {
+	raw, _ := json.Marshal(&o)
+	return raw
+}
+
+func (o *OpenAPI) YAML() []byte {
+	raw, _ := yaml.Marshal(&o)
+	return raw
+}
+
 type (
 	OpenAPI struct {
 		OpenAPI           string               `json:"openapi" yaml:"openapi"`
