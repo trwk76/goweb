@@ -13,6 +13,10 @@ jobs:
           go-version: '1.21.x'
 #       - name: Install dependencies
 #         run: go get .
+      - name: Check
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@latest
+          staticcheck $(go list ./... | grep -v /vendor/)
       - name: Build
         run: go build ./...
       - name: Test with the Go CLI
