@@ -8,7 +8,7 @@ import (
 	"github.com/trwk76/goweb/api/spec"
 )
 
-func Path(s *APISpec, p *PathSpec, name string, param bool, sec spec.SecurityRequirements, tags []string) *PathSpec {
+func Path(s *APISpec, p *PathSpec, name string, param bool, sec spec.SecurityRequirements, tags []string, setup func(sp *PathSpec)) {
 	res := &PathSpec{
 		name: name,
 		parm: param,
@@ -22,7 +22,7 @@ func Path(s *APISpec, p *PathSpec, name string, param bool, sec spec.SecurityReq
 		s.Paths.add(res)
 	}
 
-	return res
+	setup(res)
 }
 
 func GET(p *PathSpec, op *OpSpec) {

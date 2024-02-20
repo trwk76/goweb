@@ -21,12 +21,12 @@ func New(path string, dir string, pkgName string) *APISpec {
 type (
 	APISpec struct {
 		Info      spec.Info
-		Auths     AuthSpecs
 		Paths     PathSpecs
 		Schemas   SchemaSpecs
 		Params    ParamSpecs
 		ReqBodies ReqBodySpecs
 		Resps     RespSpecs
+		Auths     spec.NamedSecuritySchemes
 		Security  spec.SecurityRequirements
 		Tags      spec.Tags
 
@@ -92,7 +92,7 @@ func (s *APISpec) spec() spec.Spec {
 			Parameters:      s.Params.spec(),
 			RequestBodies:   s.ReqBodies.spec(),
 			Responses:       s.Resps.spec(),
-			SecuritySchemes: s.Auths.spec(),
+			SecuritySchemes: s.Auths,
 		},
 		Servers:  spec.Servers{{URL: s.path, Description: "Current server."}},
 		Security: s.Security,

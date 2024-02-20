@@ -1,7 +1,5 @@
 package web
 
-import "github.com/trwk76/goweb/api/spec"
-
 type (
 	SecurityRequirements []SecurityRequirement
 	SecurityRequirement  map[string][]string
@@ -16,7 +14,6 @@ type (
 
 	SecurityProvider interface {
 		Authenticate(c *Context) (Principal, error)
-		APISpec() spec.SecurityScheme
 	}
 )
 
@@ -45,16 +42,6 @@ func (p Principals) satisfy(req SecurityRequirement) bool {
 	}
 
 	return true
-}
-
-func (p SecurityProviders) APISpec() spec.NamedSecuritySchemes {
-	res := make(spec.NamedSecuritySchemes)
-
-	for key, prv := range p {
-		res[key] = prv.APISpec()
-	}
-
-	return res
 }
 
 func (p SecurityProviders) authenticate(c *Context) (Principals, error) {

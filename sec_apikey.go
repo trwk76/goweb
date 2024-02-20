@@ -2,13 +2,10 @@ package web
 
 import (
 	"fmt"
-
-	"github.com/trwk76/goweb/api/spec"
 )
 
-func APIKeySecurity(s *Server, key string, desc string, name string, in spec.SecurityAPIKeyIn, check APIKeyCredCheck) {
+func APIKeySecurity(s *Server, key string, name string, in APIKeyIn, check APIKeyCredCheck) {
 	s.secp[key] = apiKeySec{
-		desc: desc,
 		name: name,
 		in:   in,
 		chck: check,
@@ -18,34 +15,32 @@ func APIKeySecurity(s *Server, key string, desc string, name string, in spec.Sec
 type (
 	APIKeyCredCheck func(c *Context, key string) (Principal, error)
 
+	APIKeyIn string
+
 	apiKeySec struct {
-		desc string
 		name string
-		in   spec.SecurityAPIKeyIn
+		in   APIKeyIn
 		chck APIKeyCredCheck
 	}
 )
 
-func (p apiKeySec) APISpec() spec.SecurityScheme {
-	return spec.SecurityScheme{
-		Type:        spec.SecurityTypeAPIKey,
-		Description: p.desc,
-		Name:        p.name,
-		In:          p.in,
-	}
-}
+const (
+	APIKeyInCookie APIKeyIn = "cookie"
+	APIKeyInHeader APIKeyIn = "header"
+	APIKeyInQuery  APIKeyIn = "query"
+)
 
 func (p apiKeySec) Authenticate(c *Context) (Principal, error) {
 	var key string
 
 	switch p.in {
-	case spec.SecurityAPIKeyInCookie:
+	case APIKeyInCookie:
 		if cook, err := c.req.Cookie(p.name); err == nil {
 			key = cook.Value
 		}
-	case spec.SecurityAPIKeyInHeader:
+	case APIKeyInHeader:
 		key = c.req.Header.Get(p.name)
-	case spec.SecurityAPIKeyInQuery:
+	case APIKeyInQuery:
 		key = c.req.URL.Query().Get(p.name)
 	default:
 		panic(fmt.Errorf("invalid api key location '%s'", p.in))
