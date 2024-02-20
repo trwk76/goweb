@@ -7,11 +7,12 @@ import (
 
 type (
 	Path struct {
-		par *Path
-		nam string
-		typ PathType
-		mth meths
-		sub paths
+		par  *Path
+		nam  string
+		typ  PathType
+		errh ErrorHandler
+		mth  meths
+		sub  paths
 	}
 
 	PathType string
@@ -20,9 +21,9 @@ type (
 )
 
 const (
-	PathNamed    PathType = "named"
-	PathParam    PathType = "param"
-	PathSubPath  PathType = "subpath"
+	PathNamed   PathType = "named"
+	PathParam   PathType = "param"
+	PathSubPath PathType = "subpath"
 )
 
 func (p *Path) Name() string {
@@ -46,6 +47,26 @@ func (p *Path) BasePath() string {
 	return p.par.BasePath() + "/" + p.Name()
 }
 
+func (p *Path) Path(path string) *Path {
+	for _, itm := range parsePath(path) {
+		switch itm {
+		case ".":
+		case "..":
+			if p.par != nil {
+				p = p.par
+			}
+		default:
+			p = p.Child(itm)
+		}
+	}
+
+	return p
+}
+
+func (p *Path) ErrorHandler(errh ErrorHandler) {
+	p.errh = errh
+}
+
 func (p *Path) Handle(mth string, sec SecurityRequirements, handler Handler) {
 	if p.mth == nil {
 		p.mth = make(meths)
@@ -63,9 +84,13 @@ func (p *Path) Handle(mth string, sec SecurityRequirements, handler Handler) {
 	}
 }
 
-func (p *Path) Sub(name string) *Path {
+func (p *Path) Child(name string) *Path {
 	var param *Path
 	var named []*Path
+
+	if p.typ == PathSubPath {
+		panic(fmt.Errorf("path parameter cannot bear subpaths"))
+	}
 
 	typ := PathNamed
 	if strings.HasPrefix(name, ":") {
@@ -120,6 +145,25 @@ func (p *Path) Sub(name string) *Path {
 	return res
 }
 
+func (p *Path) child(c *Context, path []string) (*Path, []string) {
+	for _, sub := range p.sub {
+		switch sub.typ {
+		case PathNamed:
+			if sub.nam == path[0] {
+				return sub, path[1:]
+			}
+		case PathParam:
+			c.parm[sub.nam] = path[0]
+			return sub, path[1:]
+		case PathSubPath:
+			c.parm[sub.nam] = strings.Join(path, "/")
+			return sub, nil
+		}
+	}
+
+	return nil, path
+}
+
 type (
 	paths []*Path
 
@@ -130,3 +174,16 @@ type (
 		hdl Handler
 	}
 )
+
+func parsePath(path string) []string {
+	for strings.Contains(path, "//") {
+		path = strings.ReplaceAll(path, "//", "/")
+	}
+
+	path = strings.TrimPrefix(strings.TrimSuffix(path, "/"), "/")
+	if path == "" {
+		return nil
+	}
+
+	return strings.Split(path, "/")
+}

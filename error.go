@@ -7,6 +7,8 @@ type (
 		Status int
 		Nested error
 	}
+
+	ErrorHandler func(ctx *Context, err error) Response
 )
 
 func (e Error) Error() string {
