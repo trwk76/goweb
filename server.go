@@ -13,7 +13,10 @@ type (
 )
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var res response
+	var (
+		res response
+		err error
+	)
 
 	ctx := newContext(s, r)
 	nod := &s.root
@@ -53,9 +56,18 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if nod == nil {
+	if nod == nil || len(nod.meths) < 1{
 		res = errh(&ctx, ErrNotFound)
 		return
+	}
+
+	hdl, ok := nod.meths[r.Method]
+	if !ok {
+		res = errh(&ctx, ErrMethNotAllowed)
+	}
+
+	if res, err = hdl(&ctx); err != nil {
+		res = errh(&ctx, err)
 	}
 }
 

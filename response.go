@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type (
@@ -17,6 +18,19 @@ type (
 		Write(w http.ResponseWriter)
 	}
 )
+
+func NewTextResponse(status int, text string) Response {
+	res := Response{Status: status, Body: strings.NewReader(text)}
+
+	res.SetContentType(ContentTypeText)
+	res.SetContentLength(len(text))
+
+	return res
+}
+
+func NewDefaultResponse(status int) Response {
+	return NewTextResponse(status, http.StatusText(status))
+}
 
 func (r *Response) SetContentType(value string) {
 	r.ensureHeader()
