@@ -3,7 +3,7 @@ package spec
 type (
 	OpenAPI struct {
 		OpenAPI           string               `json:"openapi" yaml:"openapi"`
-		Info              *Info                `json:"info" yaml:"info"`
+		Info              Info                 `json:"info" yaml:"info"`
 		JSONSchemaDialect string               `json:"jsonSchemaDialect,omitempty" yaml:"jsonSchemaDialect,omitempty"`
 		Servers           []Server             `json:"servers,omitempty" yaml:"servers,omitempty"`
 		Paths             Paths                `json:"paths" yaml:"paths"`

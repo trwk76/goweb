@@ -2,6 +2,7 @@ package spec
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"gopkg.in/yaml.v3"
 )
@@ -18,6 +19,12 @@ type (
 		Ref  Reference
 	}
 )
+
+func Ref(section string, key string) Reference {
+	return Reference{
+		Ref: fmt.Sprintf("#/components/%s/%s", section, key),
+	}
+}
 
 func (r ItemOrRef[T]) MarshalJSON() ([]byte, error) {
 	if r.Ref.Ref != "" {

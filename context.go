@@ -19,6 +19,10 @@ func (c *Context) Request() *http.Request {
 	return c.req
 }
 
+func (c *Context) Param(name string) string {
+	return c.params[name]
+}
+
 func (c *Context) User() string {
 	return c.user
 }

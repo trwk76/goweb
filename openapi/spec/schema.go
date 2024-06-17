@@ -53,7 +53,7 @@ type (
 		Wrapped   bool   `json:"wrapped,omitempty" yaml:"wrapped,omitempty"`
 	}
 
-	NamedExampleOrRefs = map[string]ExampleOrRef
+	NamedExampleOrRefs map[string]ExampleOrRef
 	ExampleOrRef       = ItemOrRef[Example]
 
 	Example struct {
@@ -61,6 +61,10 @@ type (
 		Description   string `json:"description,omitempty" yaml:"description,omitempty"`
 		Value         any    `json:"value,omitempty" yaml:"value,omitempty"`
 		ExternalValue string `json:"externalValue,omitempty" yaml:"externalValue,omitempty"`
+	}
+
+	Schemater interface {
+		Schema() Schema
 	}
 )
 

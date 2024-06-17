@@ -45,7 +45,7 @@ type (
 		Required        bool               `json:"required,omitempty" yaml:"required,omitempty"`
 		Deprecated      bool               `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
 		AllowEmptyValue bool               `json:"allowEmptyValue,omitempty" yaml:"allowEmptyValue,omitempty"`
-		Schema          *SchemaOrRef       `json:"schema,omitempty" yaml:"schema,omitempty"`
+		Schema          *Schema            `json:"schema,omitempty" yaml:"schema,omitempty"`
 		Examples        NamedExampleOrRefs `json:"examples,omitempty" yaml:"examples,omitempty"`
 	}
 
@@ -59,7 +59,7 @@ type (
 		Required        bool               `json:"required,omitempty" yaml:"required,omitempty"`
 		Deprecated      bool               `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
 		AllowEmptyValue bool               `json:"allowEmptyValue,omitempty" yaml:"allowEmptyValue,omitempty"`
-		Schema          *SchemaOrRef       `json:"schema,omitempty" yaml:"schema,omitempty"`
+		Schema          *Schema            `json:"schema,omitempty" yaml:"schema,omitempty"`
 		Examples        NamedExampleOrRefs `json:"examples,omitempty" yaml:"examples,omitempty"`
 	}
 
