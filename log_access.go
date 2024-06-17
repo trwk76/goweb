@@ -1,15 +1,13 @@
-package log
-
-import web "github.com/trwk76/goweb"
+package web
 
 type (
 	AccessWriter interface {
-		Begin(ctx *web.Context)
-		End(ctx *web.Context, res web.Response)
+		Begin(ctx *Context)
+		End(ctx *Context, res Response, msecs int64)
 	}
 )
 
-func LogAccessBegin(ctx *web.Context) {
+func LogAccessBegin(ctx *Context) {
 	if accessWriter == nil {
 		return
 	}
@@ -18,13 +16,13 @@ func LogAccessBegin(ctx *web.Context) {
 	accessWriter.Begin(ctx)
 }
 
-func LogAccessEnd(ctx *web.Context, res web.Response) {
+func LogAccessEnd(ctx *Context, res Response, msecs int64) {
 	if accessWriter == nil {
 		return
 	}
 
 	defer recover()
-	accessWriter.End(ctx, res)
+	accessWriter.End(ctx, res, msecs)
 }
 
 func SetAccessWriter(w AccessWriter) {

@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func New(errHandler ErrorHandler) Server {
 	if errHandler == nil {
 		errHandler = func(ctx *Context, err error) Response {
-			e, ok := err.(Error)
+			e, ok := err.(HTTPError)
 			if !ok {
 				e = ErrInternalError
 			}
@@ -56,6 +57,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	nod := &s.path
 	errh := nod.errh
 
+	LogAccessBegin(&ctx)
+
 	defer func() {
 		if r := recover(); r != nil {
 			err, ok := r.(error)
@@ -63,10 +66,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				err = fmt.Errorf("request panic: %v", r)
 			}
 
+			LogEvent(ctx.tm, ctx.corrID, EventError, err.Error())
 			res = errh(&ctx, err)
 		}
 
 		res.WriteResponse(w)
+
+		LogAccessEnd(&ctx, res, int64(time.Since(ctx.tm)/time.Millisecond))
 	}()
 
 	path := parsePath(r.URL.Path)

@@ -40,6 +40,14 @@ func NewDefaultResponse(status int) ResponseData {
 	return NewTextResponse(status, http.StatusText(status))
 }
 
+func NewRedirectResponse(status int, url string) ResponseData {
+	res := NewResponseData(status)
+
+	res.Header.Set(HeaderLocation, url)
+
+	return res
+}
+
 func NewResponseData(status int) ResponseData {
 	return ResponseData{
 		StatusCode: status,

@@ -47,11 +47,12 @@ const (
 	HeaderContentType   string = "Content-Type"
 	HeaderContentLength string = "Content-Length"
 	HeaderETag          string = "ETag"
+	HeaderLocation      string = "Location"
 )
 
 const (
 	ContentTypeHTML string = "text/html"
-	ContentTypeJSOM string = "application/json"
+	ContentTypeJSON string = "application/json"
 	ContentTypeText string = "text/plain"
 	ContentTypeYAML string = "application/yaml"
 )

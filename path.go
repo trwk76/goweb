@@ -3,17 +3,57 @@ package web
 import (
 	"fmt"
 	"go/token"
+	"net/http"
 	"strings"
 )
 
-func (p *path) Path() string {
-	res := ""
+func GET_HEAD(p Path, hdl Handler) {
+	p.Handle(http.MethodGet, hdl)
+	p.Handle(http.MethodHead, hdl)
+}
 
+func GET(p Path, hdl Handler) {
+	p.Handle(http.MethodGet, hdl)
+}
+
+func PUT(p Path, hdl Handler) {
+	p.Handle(http.MethodPut, hdl)
+}
+
+func POST(p Path, hdl Handler) {
+	p.Handle(http.MethodPost, hdl)
+}
+
+func DELETE(p Path, hdl Handler) {
+	p.Handle(http.MethodDelete, hdl)
+}
+
+func OPTIONS(p Path, hdl Handler) {
+	p.Handle(http.MethodOptions, hdl)
+}
+
+func HEAD(p Path, hdl Handler) {
+	p.Handle(http.MethodHead, hdl)
+}
+
+func PATCH(p Path, hdl Handler) {
+	p.Handle(http.MethodPatch, hdl)
+}
+
+func TRACE(p Path, hdl Handler) {
+	p.Handle(http.MethodTrace, hdl)
+}
+
+func (p *path) Path() string {
 	if p.par != nil {
-		res = p.par.Path()
+		if p.par.par != nil {
+			return p.par.Path() + "/" + p.name
+		}
+
+		return "/" + p.name
 	}
 
-	return res + "/" + p.name
+	return "/"
 }
 
 func (p *path) Named(name string, errHandler ErrorHandler) Path {
@@ -85,6 +125,7 @@ type (
 		Path() string
 		Named(name string, errHandler ErrorHandler) Path
 		Param(name string, path bool, errHandler ErrorHandler) Path
+		Handle(meth string, hdl Handler)
 	}
 
 	path struct {
