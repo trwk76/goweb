@@ -19,6 +19,10 @@ func (c *Context) Request() *http.Request {
 	return c.req
 }
 
+func (c *Context) User() string {
+	return c.user
+}
+
 type (
 	Context struct {
 		srv    *Server
@@ -26,6 +30,7 @@ type (
 		corrID string
 		req    *http.Request
 		params map[string]string
+		user   string
 	}
 )
 
