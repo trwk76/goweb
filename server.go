@@ -6,11 +6,45 @@ import (
 	"strings"
 )
 
+func New(errHandler ErrorHandler) Server {
+	if errHandler == nil {
+		errHandler = func(ctx *Context, err error) response {
+			e, ok := err.(Error)
+			if !ok {
+				e = ErrInternalError
+			}
+
+			return e
+		}
+	}
+
+	return Server{
+		path: path{
+			paths: paths{
+				named: make(map[string]*path),
+			},
+			name: "",
+			meths: make(map[string]Handler),
+			errh: errHandler,
+		},
+	}
+}
+
 type (
 	Server struct {
-		root path
+		path
 	}
 )
+
+func (s *Server) Run(srv *http.Server, certPath string, keyPath string) error {
+	srv.Handler = s
+
+	if certPath != "" && keyPath != "" {
+		return srv.ListenAndServeTLS(certPath, keyPath)
+	}
+
+	return srv.ListenAndServe()
+}
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var (
@@ -19,7 +53,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	)
 
 	ctx := newContext(s, r)
-	nod := &s.root
+	nod := &s.path
 	errh := nod.errh
 
 	defer func() {

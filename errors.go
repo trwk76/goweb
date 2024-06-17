@@ -5,6 +5,7 @@ import "net/http"
 var (
 	ErrNotFound       Error = Error{Status: http.StatusNotFound}
 	ErrMethNotAllowed Error = Error{Status: http.StatusMethodNotAllowed}
+	ErrInternalError  Error = Error{Status: http.StatusInternalServerError}
 )
 
 type (

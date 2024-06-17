@@ -1,6 +1,8 @@
 package web
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -16,6 +18,12 @@ type (
 
 	response interface {
 		Write(w http.ResponseWriter)
+	}
+
+	respBuffer struct {
+		hdr    http.Header
+		status int
+		body   bytes.Buffer
 	}
 )
 
@@ -40,6 +48,11 @@ func (r *Response) SetContentType(value string) {
 func (r *Response) SetContentLength(value int) {
 	r.ensureHeader()
 	r.Header.Set(HeaderContentLength, strconv.Itoa(value))
+}
+
+func (r *Response) SetETag(value string) {
+	r.ensureHeader()
+	r.Header.Set(HeaderETag, fmt.Sprintf(`"%s"`, value))
 }
 
 func (r Response) Write(w http.ResponseWriter) {
@@ -68,4 +81,23 @@ func (r *Response) ensureHeader() {
 	}
 }
 
-var _ response = Response{}
+func newRespBuffer() respBuffer {
+	return respBuffer{hdr: make(http.Header)}
+}
+
+func (r *respBuffer) Header() http.Header {
+	return r.hdr
+}
+
+func (r *respBuffer) WriteHeader(status int) {
+	r.status = status
+}
+
+func (r *respBuffer) Write(p []byte) (int, error) {
+	return r.body.Write(p)
+}
+
+var (
+	_ response            = Response{}
+	_ http.ResponseWriter = (*respBuffer)(nil)
+)

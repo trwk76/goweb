@@ -3,6 +3,7 @@ package web
 const (
 	HeaderContentType   string = "Content-Type"
 	HeaderContentLength string = "Content-Length"
+	HeaderETag          string = "ETag"
 )
 
 const (
