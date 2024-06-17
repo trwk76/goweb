@@ -3,21 +3,25 @@ package web
 import "net/http"
 
 var (
-	ErrNotFound       Error = Error{Status: http.StatusNotFound}
-	ErrMethNotAllowed Error = Error{Status: http.StatusMethodNotAllowed}
-	ErrInternalError  Error = Error{Status: http.StatusInternalServerError}
+	ErrNotFound       Error = Error{StatusCode: http.StatusNotFound}
+	ErrMethNotAllowed Error = Error{StatusCode: http.StatusMethodNotAllowed}
+	ErrInternalError  Error = Error{StatusCode: http.StatusInternalServerError}
 )
 
 type (
 	Error struct {
-		Status int
+		StatusCode int
 	}
 )
 
 func (e Error) Error() string {
-	return http.StatusText(e.Status)
+	return http.StatusText(e.StatusCode)
 }
 
-func (e Error) WriteResponse(w http.ResponseWriter) {
-	NewDefaultResponse(e.Status).WriteResponse(w)
+func (e Error) Status() int {
+	return e.StatusCode
+}
+
+func (e Error) Response() Response {
+	return NewDefaultResponse(e.StatusCode)
 }

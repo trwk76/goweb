@@ -8,13 +8,13 @@ import (
 
 func New(errHandler ErrorHandler) Server {
 	if errHandler == nil {
-		errHandler = func(ctx *Context, err error) response {
+		errHandler = func(ctx *Context, err error) Response {
 			e, ok := err.(Error)
 			if !ok {
 				e = ErrInternalError
 			}
 
-			return e
+			return e.Response()
 		}
 	}
 
@@ -48,7 +48,7 @@ func (s *Server) Run(srv *http.Server, certPath string, keyPath string) error {
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var (
-		res response
+		res Response
 		err error
 	)
 

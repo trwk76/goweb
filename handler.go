@@ -7,16 +7,16 @@ import (
 )
 
 type (
-	Handler      func(ctx *Context) (response, error)
-	ErrorHandler func(ctx *Context, err error) response
+	Handler      func(ctx *Context) (Response, error)
+	ErrorHandler func(ctx *Context, err error) Response
 )
 
 func Content(name string, contentType string, etag string, modTime time.Time, content io.ReadSeeker) Handler {
-	return func(ctx *Context) (response, error) {
+	return func(ctx *Context) (Response, error) {
 		res := NewRespBuffer()
 
-		SetHeaderContentType(res.hdr, contentType)
-		SetHeaderETag(res.hdr, etag)
+		SetContentType(res.hdr, contentType)
+		SetETag(res.hdr, etag)
 
 		http.ServeContent(&res, ctx.req, name, modTime, content)
 

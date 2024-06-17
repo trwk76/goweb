@@ -6,7 +6,20 @@ import (
 	"strconv"
 )
 
-func SetHeaderContentType(h http.Header, value string) {
+func ContentType(h http.Header) string {
+	return h.Get(HeaderContentType)
+}
+
+func ContentLength(h http.Header) int {
+	val, err := strconv.Atoi(h.Get(HeaderContentLength))
+	if err != nil {
+		val = 0
+	}
+
+	return val
+}
+
+func SetContentType(h http.Header, value string) {
 	if value != "" {
 		h.Set(HeaderContentType, value)
 	} else {
@@ -14,7 +27,7 @@ func SetHeaderContentType(h http.Header, value string) {
 	}
 }
 
-func SetHeaderContentLength(h http.Header, value int) {
+func SetContentLength(h http.Header, value int) {
 	if value >= 0 {
 		h.Set(HeaderContentLength, strconv.Itoa(value))
 	} else {
@@ -22,7 +35,7 @@ func SetHeaderContentLength(h http.Header, value int) {
 	}
 }
 
-func SetHeaderETag(h http.Header, value string) {
+func SetETag(h http.Header, value string) {
 	if value >= "" {
 		h.Set(HeaderETag, fmt.Sprintf(`"%s"`, value))
 	} else {

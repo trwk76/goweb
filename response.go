@@ -8,10 +8,10 @@ import (
 )
 
 type (
-	Response struct {
-		Status int
-		Header http.Header
-		Body   io.Reader
+	ResponseData struct {
+		StatusCode int
+		Header     http.Header
+		Body       io.Reader
 	}
 
 	ResponseBuffer struct {
@@ -20,32 +20,42 @@ type (
 		body   bytes.Buffer
 	}
 
-	response interface {
+	Response interface {
+		Status() int
+		Size() int
 		WriteResponse(w http.ResponseWriter)
 	}
 )
 
-func NewTextResponse(status int, text string) Response {
-	res := Response{Status: status, Body: strings.NewReader(text)}
+func NewTextResponse(status int, text string) ResponseData {
+	res := ResponseData{StatusCode: status, Body: strings.NewReader(text)}
 
-	SetHeaderContentType(res.Header, ContentTypeText)
-	SetHeaderContentLength(res.Header, len(text))
+	SetContentType(res.Header, ContentTypeText)
+	SetContentLength(res.Header, len(text))
 
 	return res
 }
 
-func NewDefaultResponse(status int) Response {
+func NewDefaultResponse(status int) ResponseData {
 	return NewTextResponse(status, http.StatusText(status))
 }
 
-func NewResponse(status int) Response {
-	return Response{
-		Status: status,
-		Header: make(http.Header),
+func NewResponseData(status int) ResponseData {
+	return ResponseData{
+		StatusCode: status,
+		Header:     make(http.Header),
 	}
 }
 
-func (r Response) WriteResponse(w http.ResponseWriter) {
+func (r ResponseData) Status() int {
+	return r.StatusCode
+}
+
+func (r ResponseData) Size() int {
+	return ContentLength(r.Header)
+}
+
+func (r ResponseData) WriteResponse(w http.ResponseWriter) {
 	if len(r.Header) > 0 {
 		for key, vals := range r.Header {
 			for _, val := range vals {
@@ -54,7 +64,7 @@ func (r Response) WriteResponse(w http.ResponseWriter) {
 		}
 	}
 
-	w.WriteHeader(r.Status)
+	w.WriteHeader(r.StatusCode)
 
 	if r.Body != nil {
 		if cl, ok := r.Body.(io.Closer); ok {
@@ -71,6 +81,14 @@ func NewRespBuffer() ResponseBuffer {
 
 func (r *ResponseBuffer) Header() http.Header {
 	return r.hdr
+}
+
+func (r *ResponseBuffer) Status() int {
+	return r.status
+}
+
+func (r *ResponseBuffer) Size() int {
+	return ContentLength(r.hdr)
 }
 
 func (r *ResponseBuffer) WriteHeader(status int) {
@@ -93,6 +111,7 @@ func (r *ResponseBuffer) WriteResponse(w http.ResponseWriter) {
 }
 
 var (
-	_ response            = Response{}
+	_ Response            = ResponseData{}
+	_ Response            = (*ResponseBuffer)(nil)
 	_ http.ResponseWriter = (*ResponseBuffer)(nil)
 )
