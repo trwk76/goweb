@@ -23,9 +23,9 @@ func New(errHandler ErrorHandler) Server {
 			paths: paths{
 				named: make(map[string]*path),
 			},
-			name: "",
+			name:  "",
 			meths: make(map[string]Handler),
-			errh: errHandler,
+			errh:  errHandler,
 		},
 	}
 }
@@ -66,7 +66,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			res = errh(&ctx, err)
 		}
 
-		res.Write(w)
+		res.WriteResponse(w)
 	}()
 
 	path := parsePath(r.URL.Path)
@@ -90,7 +90,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if nod == nil || len(nod.meths) < 1{
+	if nod == nil || len(nod.meths) < 1 {
 		res = errh(&ctx, ErrNotFound)
 		return
 	}

@@ -2,10 +2,8 @@ package web
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -16,22 +14,22 @@ type (
 		Body   io.Reader
 	}
 
-	response interface {
-		Write(w http.ResponseWriter)
-	}
-
-	respBuffer struct {
+	ResponseBuffer struct {
 		hdr    http.Header
 		status int
 		body   bytes.Buffer
+	}
+
+	response interface {
+		WriteResponse(w http.ResponseWriter)
 	}
 )
 
 func NewTextResponse(status int, text string) Response {
 	res := Response{Status: status, Body: strings.NewReader(text)}
 
-	res.SetContentType(ContentTypeText)
-	res.SetContentLength(len(text))
+	SetHeaderContentType(res.Header, ContentTypeText)
+	SetHeaderContentLength(res.Header, len(text))
 
 	return res
 }
@@ -40,22 +38,14 @@ func NewDefaultResponse(status int) Response {
 	return NewTextResponse(status, http.StatusText(status))
 }
 
-func (r *Response) SetContentType(value string) {
-	r.ensureHeader()
-	r.Header.Set(HeaderContentType, value)
+func NewResponse(status int) Response {
+	return Response{
+		Status: status,
+		Header: make(http.Header),
+	}
 }
 
-func (r *Response) SetContentLength(value int) {
-	r.ensureHeader()
-	r.Header.Set(HeaderContentLength, strconv.Itoa(value))
-}
-
-func (r *Response) SetETag(value string) {
-	r.ensureHeader()
-	r.Header.Set(HeaderETag, fmt.Sprintf(`"%s"`, value))
-}
-
-func (r Response) Write(w http.ResponseWriter) {
+func (r Response) WriteResponse(w http.ResponseWriter) {
 	if len(r.Header) > 0 {
 		for key, vals := range r.Header {
 			for _, val := range vals {
@@ -75,29 +65,34 @@ func (r Response) Write(w http.ResponseWriter) {
 	}
 }
 
-func (r *Response) ensureHeader() {
-	if r.Header == nil {
-		r.Header = make(http.Header)
-	}
+func NewRespBuffer() ResponseBuffer {
+	return ResponseBuffer{hdr: make(http.Header)}
 }
 
-func newRespBuffer() respBuffer {
-	return respBuffer{hdr: make(http.Header)}
-}
-
-func (r *respBuffer) Header() http.Header {
+func (r *ResponseBuffer) Header() http.Header {
 	return r.hdr
 }
 
-func (r *respBuffer) WriteHeader(status int) {
+func (r *ResponseBuffer) WriteHeader(status int) {
 	r.status = status
 }
 
-func (r *respBuffer) Write(p []byte) (int, error) {
+func (r *ResponseBuffer) Write(p []byte) (int, error) {
 	return r.body.Write(p)
+}
+
+func (r *ResponseBuffer) WriteResponse(w http.ResponseWriter) {
+	for key, vals := range r.hdr {
+		for _, val := range vals {
+			w.Header().Add(key, val)
+		}
+	}
+
+	w.WriteHeader(r.status)
+	io.Copy(w, &r.body)
 }
 
 var (
 	_ response            = Response{}
-	_ http.ResponseWriter = (*respBuffer)(nil)
+	_ http.ResponseWriter = (*ResponseBuffer)(nil)
 )

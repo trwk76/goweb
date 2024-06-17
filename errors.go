@@ -18,6 +18,6 @@ func (e Error) Error() string {
 	return http.StatusText(e.Status)
 }
 
-func (e Error) Write(w http.ResponseWriter) {
-	NewDefaultResponse(e.Status).Write(w)
+func (e Error) WriteResponse(w http.ResponseWriter) {
+	NewDefaultResponse(e.Status).WriteResponse(w)
 }

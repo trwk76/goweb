@@ -13,18 +13,13 @@ type (
 
 func Content(name string, contentType string, etag string, modTime time.Time, content io.ReadSeeker) Handler {
 	return func(ctx *Context) (response, error) {
-		res := newRespBuffer()
+		res := NewRespBuffer()
 
-		if contentType != "" {
-			res.SetContentType(contentType)
-		}
-
-		if etag != "" {
-			res.SetETag(etag)
-		}
+		SetHeaderContentType(res.hdr, contentType)
+		SetHeaderETag(res.hdr, etag)
 
 		http.ServeContent(&res, ctx.req, name, modTime, content)
 
-		return res.response(), nil
+		return &res, nil
 	}
 }
