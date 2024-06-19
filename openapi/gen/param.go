@@ -2,10 +2,12 @@ package gen
 
 import "github.com/trwk76/goweb/openapi/spec"
 
-func ParamFor[T any](a *API, f func(s *spec.Parameter), examples Examples[T]) spec.Parameter {
+func ParamFor[T any](a *API, name string, in spec.ParameterIn, f func(s *spec.Parameter), examples Examples[T]) spec.Parameter {
 	sch := SchemaFor[T](a, "", nil)
 
 	res := spec.Parameter{
+		Name:     name,
+		In:       in,
 		Schema:   &sch,
 		Examples: examples.spec(JSON),
 	}
