@@ -119,7 +119,7 @@ func (p *Path) ParamPath(param spec.ParameterOrRef, f func(p *Path)) *Path {
 		panic(fmt.Errorf("path cannot have a parameter since it already declares named subpaths"))
 	} else if p.paths.param != nil {
 		panic(fmt.Errorf("path already declares a parameter"))
-	} else if p.par.hasParam(pspec.Name) {
+	} else if p.par != nil && p.par.hasParam(pspec.Name) {
 		panic(fmt.Errorf("parameter '%s' already declared in parent path", pspec.Name))
 	}
 
