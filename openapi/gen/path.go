@@ -129,7 +129,7 @@ func (p *Path) ParamPath(param spec.ParameterOrRef, f func(p *Path)) *Path {
 		},
 		api:      p.api,
 		par:      p,
-		path:     p.par.path + "/:" + pspec.Name,
+		path:     p.path + "/:" + pspec.Name,
 		pref:     param,
 		meths:    make(map[string]spec.Operation),
 		OpPrefix: p.OpPrefix,
