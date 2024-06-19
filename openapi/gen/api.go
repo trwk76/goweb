@@ -2,8 +2,9 @@ package gen
 
 import "github.com/trwk76/goweb/openapi/spec"
 
-func New(path string, info spec.Info) *API {
+func New(path string, mtypes MediaTypes, info spec.Info) *API {
 	res := &API{
+		mtyps: mtypes,
 		spc: spec.OpenAPI{
 			OpenAPI: spec.Version,
 			Info:    info,
@@ -27,7 +28,8 @@ func New(path string, info spec.Info) *API {
 
 type (
 	API struct {
-		spc spec.OpenAPI
-		sch schemas
+		mtyps MediaTypes
+		spc   spec.OpenAPI
+		sch   schemas
 	}
 )

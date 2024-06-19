@@ -10,19 +10,19 @@ import (
 	"github.com/trwk76/goweb/openapi/spec"
 )
 
-func SchemaFor[T any](a *API, mediaType MediaType) spec.Schema {
-	return a.SchemaOf(reflect.TypeFor[T](), mediaType)
+func SchemaFor[T any](a *API, key string, mediaType MediaType) spec.Schema {
+	return a.SchemaOf(reflect.TypeFor[T](), key, mediaType)
 }
 
-func SchemaOrRefFor[T any](a *API, mediaType MediaType) spec.SchemaOrRef {
-	return a.SchemaOrRefOf(reflect.TypeFor[T](), mediaType)
+func SchemaOrRefFor[T any](a *API, key string, mediaType MediaType) spec.SchemaOrRef {
+	return a.SchemaOrRefOf(reflect.TypeFor[T](), key, mediaType)
 }
 
-func (a *API) SchemaOf(t reflect.Type, mediaType MediaType) spec.Schema {
-	return a.Schema(a.SchemaOrRefOf(t, mediaType))
+func (a *API) SchemaOf(t reflect.Type, key string, mediaType MediaType) spec.Schema {
+	return a.Schema(a.SchemaOrRefOf(t, key, mediaType))
 }
 
-func (a *API) SchemaOrRefOf(t reflect.Type, mediaType MediaType) spec.SchemaOrRef {
+func (a *API) SchemaOrRefOf(t reflect.Type, key string, mediaType MediaType) spec.SchemaOrRef {
 	var res spec.Schema
 
 	if t.Kind() == reflect.Pointer {
@@ -38,8 +38,8 @@ func (a *API) SchemaOrRefOf(t reflect.Type, mediaType MediaType) spec.SchemaOrRe
 			panic(fmt.Errorf("complex type requires a mediaType"))
 		}
 
-		if key, ok := se.mtypes[mediaType.ContentType()]; ok {
-			return spec.SchemaOrRef{Ref: spec.Ref("schemas", key)}
+		if skey, ok := se.mtypes[key]; ok {
+			return spec.SchemaOrRef{Ref: spec.Ref("schemas", skey)}
 		}
 	}
 
@@ -48,7 +48,7 @@ func (a *API) SchemaOrRefOf(t reflect.Type, mediaType MediaType) spec.SchemaOrRe
 	} else {
 		switch t.Kind() {
 		case reflect.Array:
-			itm := a.SchemaOrRefOf(t.Elem(), mediaType)
+			itm := a.SchemaOrRefOf(t.Elem(), key, mediaType)
 
 			res.Type = spec.TypeArray
 			res.Items = &itm
@@ -69,17 +69,17 @@ func (a *API) SchemaOrRefOf(t reflect.Type, mediaType MediaType) spec.SchemaOrRe
 		case reflect.Int8:
 			res = numSchema(spec.TypeInteger, spec.FormatNone, int8(math.MinInt8), math.MaxInt8)
 		case reflect.Map:
-			key := a.SchemaOf(t.Key(), mediaType)
-			if key.Type != spec.TypeString {
+			keyt := a.SchemaOf(t.Key(), key, mediaType)
+			if keyt.Type != spec.TypeString {
 				panic(fmt.Errorf("type '%s' is not a string though used as a map key", t.Key().String()))
 			}
 
-			itm := a.SchemaOrRefOf(t.Elem(), mediaType)
+			itm := a.SchemaOrRefOf(t.Elem(), key, mediaType)
 
 			res.Type = spec.TypeObject
 			res.AdditionalProperties = &itm
 		case reflect.Slice:
-			itm := a.SchemaOrRefOf(t.Elem(), mediaType)
+			itm := a.SchemaOrRefOf(t.Elem(), key, mediaType)
 
 			res.Type = spec.TypeArray
 			res.Items = &itm
@@ -95,7 +95,7 @@ func (a *API) SchemaOrRefOf(t reflect.Type, mediaType MediaType) spec.SchemaOrRe
 			res.Properties = props
 
 			for i := 0; i < t.NumField(); i++ {
-				mediaType.ReflectField(a, t.Field(i), &bases, props, &req)
+				mediaType.ReflectField(a, key, t.Field(i), &bases, props, &req)
 			}
 
 			if len(bases) > 0 {
@@ -113,23 +113,35 @@ func (a *API) SchemaOrRefOf(t reflect.Type, mediaType MediaType) spec.SchemaOrRe
 	}
 
 	if t.PkgPath() != "" && token.IsIdentifier(t.Name()) {
-		key := uniqueName(a.spc.Components.Schemas, strcase.ToLowerCamel(t.Name()))
+		skey := uniqueName(a.spc.Components.Schemas, strcase.ToLowerCamel(t.Name()))
 
 		se, ok := a.sch[t]
 
 		switch res.Type {
 		case spec.TypeNull, spec.TypeBoolean, spec.TypeInteger, spec.TypeNumber, spec.TypeString:
-			se.simple = key
+			se.simple = skey
+			a.sch[t] = se
+			a.spc.Components.Schemas[skey] = res
 		default:
 			if !ok {
 				se.mtypes = make(map[string]string)
 			}
 
-			se.mtypes[mediaType.ContentType()] = key
-		}
+			fnd := false
 
-		a.sch[t] = se
-		a.spc.Components.Schemas[key] = res
+			for _, eskey := range se.mtypes {
+				if reflect.DeepEqual(res, a.spc.Components.Schemas[eskey]) {
+					skey = eskey
+					fnd = true
+				}
+			}
+
+			if !fnd {
+				se.mtypes[key] = skey
+				a.sch[t] = se
+				a.spc.Components.Schemas[skey] = res
+			}
+		}
 
 		return spec.SchemaOrRef{Ref: spec.Ref("schemas", key)}
 	}
