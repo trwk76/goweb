@@ -91,12 +91,13 @@ func (a *API) SchemaOrRefOf(t reflect.Type, key string, mediaType MediaType) spe
 			req := make([]string, 0)
 
 			res.Type = spec.TypeObject
-			res.Required = req
-			res.Properties = props
 
 			for i := 0; i < t.NumField(); i++ {
 				mediaType.ReflectField(a, key, t.Field(i), &bases, props, &req)
 			}
+
+			res.Required = req
+			res.Properties = props
 
 			if len(bases) > 0 {
 				res = spec.Schema{AllOf: append(bases, spec.SchemaOrRef{Item: res})}
