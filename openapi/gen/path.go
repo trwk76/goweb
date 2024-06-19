@@ -2,6 +2,7 @@ package gen
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/trwk76/goweb/openapi/spec"
@@ -25,7 +26,7 @@ func (a *API) NamedPath(name string, f func(p *Path)) *Path {
 		api:   a,
 		par:   nil,
 		path:  "/" + name,
-		meths: make(map[string]*Operation),
+		meths: make(map[string]spec.Operation),
 	}
 
 	a.paths.named[name] = res
@@ -60,7 +61,7 @@ func (a *API) ParamPath(param spec.ParameterOrRef, f func(p *Path)) *Path {
 		par:   nil,
 		path:  "/:" + pspec.Name,
 		pref:  param,
-		meths: make(map[string]*Operation),
+		meths: make(map[string]spec.Operation),
 	}
 
 	a.paths.param = res
@@ -90,7 +91,7 @@ func (p *Path) NamedPath(name string, f func(p *Path)) *Path {
 		api:      p.api,
 		par:      p,
 		path:     p.path + "/" + name,
-		meths:    make(map[string]*Operation),
+		meths:    make(map[string]spec.Operation),
 		OpPrefix: p.OpPrefix,
 		Security: p.Security,
 		Tags:     p.Tags,
@@ -130,7 +131,7 @@ func (p *Path) ParamPath(param spec.ParameterOrRef, f func(p *Path)) *Path {
 		par:      p,
 		path:     p.par.path + "/:" + pspec.Name,
 		pref:     param,
-		meths:    make(map[string]*Operation),
+		meths:    make(map[string]spec.Operation),
 		OpPrefix: p.OpPrefix,
 		Security: p.Security,
 		Tags:     p.Tags,
@@ -145,6 +146,38 @@ func (p *Path) ParamPath(param spec.ParameterOrRef, f func(p *Path)) *Path {
 	return res
 }
 
+func (p *Path) GET(op spec.Operation) {
+	p.setMeth(http.MethodGet, op, false)
+}
+
+func (p *Path) PUT(op spec.Operation) {
+	p.setMeth(http.MethodPut, op, true)
+}
+
+func (p *Path) POST(op spec.Operation) {
+	p.setMeth(http.MethodPost, op, true)
+}
+
+func (p *Path) DELETE(op spec.Operation) {
+	p.setMeth(http.MethodDelete, op, false)
+}
+
+func (p *Path) OPTIONS(op spec.Operation) {
+	p.setMeth(http.MethodOptions, op, false)
+}
+
+func (p *Path) HEAD(op spec.Operation) {
+	p.setMeth(http.MethodHead, op, false)
+}
+
+func (p *Path) PATCH(op spec.Operation) {
+	p.setMeth(http.MethodPatch, op, true)
+}
+
+func (p *Path) TRACE(op spec.Operation) {
+	p.setMeth(http.MethodTrace, op, false)
+}
+
 type (
 	Path struct {
 		paths
@@ -152,7 +185,7 @@ type (
 		par   *Path
 		path  string
 		pref  spec.ParameterOrRef
-		meths map[string]*Operation
+		meths map[string]spec.Operation
 
 		OpPrefix string
 		Security spec.SecurityRequirements
@@ -175,4 +208,36 @@ func (p *Path) hasParam(name string) bool {
 	}
 
 	return false
+}
+
+func (p *Path) params() spec.ParameterOrRefs {
+	var res spec.ParameterOrRefs
+
+	if p.par != nil {
+		res = p.par.params()
+	}
+
+	if p.pref.Ref.Ref != "" || p.pref.Item.In == spec.ParameterPath {
+		res = append(res, p.pref)
+	}
+
+	return res
+}
+
+func (p *Path) setMeth(meth string, op spec.Operation, acceptBody bool) {
+	if !acceptBody && op.RequestBody != nil {
+		panic(fmt.Errorf("http method %s does not allow a request body", meth))
+	}
+
+	if p.OpPrefix != "" {
+		op.OperationID = p.OpPrefix + op.OperationID
+	}
+
+	if len(op.Security) < 1 {
+		op.Security = p.Security
+	}
+
+	op.Parameters = append(p.params(), op.Parameters...)
+	op.Tags = append(op.Tags, p.Tags.spec()...)
+	p.meths[meth] = op
 }

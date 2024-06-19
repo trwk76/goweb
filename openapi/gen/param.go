@@ -2,6 +2,18 @@ package gen
 
 import "github.com/trwk76/goweb/openapi/spec"
 
+func ParamFor[T any](a *API, f func(s *spec.Parameter), examples Examples[T]) spec.Parameter {
+	sch := SchemaFor[T](a, "", nil)
+
+	res := spec.Parameter{
+		Schema:   &sch,
+		Examples: examples.spec(JSON),
+	}
+
+	f(&res)
+	return res
+}
+
 func (a *API) ParamOrRef(key string, spc spec.Parameter) spec.ParameterOrRef {
 	if key != "" {
 		key = uniqueName(a.spc.Components.Parameters, key)
