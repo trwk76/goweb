@@ -52,7 +52,12 @@ func (t JSONMediaType) ReflectField(a *API, key string, fld reflect.StructField,
 
 	flds := strings.Split(tag, ",")
 	name := flds[0]
-	flds = flds[1:]
+
+	if len(flds) > 1 {
+		flds = flds[1:]
+	} else {
+		flds = nil
+	}
 
 	if name == "" && fld.Anonymous {
 		// base
@@ -88,7 +93,12 @@ func (t YAMLMediaType) ReflectField(a *API, key string, fld reflect.StructField,
 
 	flds := strings.Split(tag, ",")
 	name := flds[0]
-	flds = flds[1:]
+
+	if len(flds) > 1 {
+		flds = flds[1:]
+	} else {
+		flds = nil
+	}
 
 	if slices.Contains(flds, "inline") {
 		// base
