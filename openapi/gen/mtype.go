@@ -75,7 +75,7 @@ func (t JSONMediaType) ReflectField(a *API, key string, fld reflect.StructField,
 		props[name] = a.SchemaOrRefOf(fld.Type, key, t)
 	}
 
-	if !slices.Contains(flds[1:], "omitempty") {
+	if !slices.Contains(flds, "omitempty") {
 		*req = append(*req, name)
 	}
 }

@@ -69,7 +69,7 @@ type (
 	UserInfo struct {
 		ID    EntityID `json:"id" yaml:"id"`
 		Name  string   `json:"name" yaml:"name"`
-		Email string   `json:"email" yaml:"email"`
+		Email string   `json:"email,omitempty" yaml:"email,omitempty"`
 	}
 )
 
