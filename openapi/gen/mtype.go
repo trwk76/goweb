@@ -14,7 +14,7 @@ func ContentFor[T any](a *API, mtypes MediaTypes, examples Examples[T]) spec.Med
 	t := reflect.TypeFor[T]()
 	res := make(spec.MediaTypes)
 
-	for key, mtyp := range mtypes.Items {
+	for key, mtyp := range mtypes {
 		sch := a.SchemaOrRefOf(t, key, mtyp)
 
 		res[key] = spec.MediaType{
@@ -27,10 +27,7 @@ func ContentFor[T any](a *API, mtypes MediaTypes, examples Examples[T]) spec.Med
 }
 
 type (
-	MediaTypes struct {
-		Default string
-		Items   map[string]MediaType
-	}
+	MediaTypes map[string]MediaType
 
 	MediaType interface {
 		ReflectField(a *API, key string, fld reflect.StructField, bases *[]spec.SchemaOrRef, props spec.NamedSchemaOrRefs, req *[]string)
