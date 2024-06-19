@@ -6,18 +6,18 @@ type (
 	PathItemOfRef       = ItemOrRef[PathItem]
 
 	PathItem struct {
-		Summary     string           `json:"summary,omitempty" yaml:"summary,omitempty"`
-		Description string           `json:"description,omitempty" yaml:"description,omitempty"`
-		GET         *Operation       `json:"get,omitempty" yaml:"get,omitempty"`
-		PUT         *Operation       `json:"put,omitempty" yaml:"put,omitempty"`
-		POST        *Operation       `json:"post,omitempty" yaml:"post,omitempty"`
-		DELETE      *Operation       `json:"delete,omitempty" yaml:"delete,omitempty"`
-		OPTIONS     *Operation       `json:"options,omitempty" yaml:"options,omitempty"`
-		HEAD        *Operation       `json:"head,omitempty" yaml:"head,omitempty"`
-		PATCH       *Operation       `json:"patch,omitempty" yaml:"patch,omitempty"`
-		TRACE       *Operation       `json:"trace,omitempty" yaml:"trace,omitempty"`
-		Servers     []Server         `json:"servers,omitempty" yaml:"servers,omitempty"`
-		Parameters  []ParameterOrRef `json:"parameters,omitempty" yaml:"parameters,omitempty"`
+		Summary     string          `json:"summary,omitempty" yaml:"summary,omitempty"`
+		Description string          `json:"description,omitempty" yaml:"description,omitempty"`
+		GET         *Operation      `json:"get,omitempty" yaml:"get,omitempty"`
+		PUT         *Operation      `json:"put,omitempty" yaml:"put,omitempty"`
+		POST        *Operation      `json:"post,omitempty" yaml:"post,omitempty"`
+		DELETE      *Operation      `json:"delete,omitempty" yaml:"delete,omitempty"`
+		OPTIONS     *Operation      `json:"options,omitempty" yaml:"options,omitempty"`
+		HEAD        *Operation      `json:"head,omitempty" yaml:"head,omitempty"`
+		PATCH       *Operation      `json:"patch,omitempty" yaml:"patch,omitempty"`
+		TRACE       *Operation      `json:"trace,omitempty" yaml:"trace,omitempty"`
+		Servers     []Server        `json:"servers,omitempty" yaml:"servers,omitempty"`
+		Parameters  ParameterOrRefs `json:"parameters,omitempty" yaml:"parameters,omitempty"`
 	}
 
 	Operation struct {
@@ -26,7 +26,7 @@ type (
 		Description  string               `json:"description,omitempty" yaml:"description,omitempty"`
 		ExternalDocs *ExternalDoc         `json:"externalDocs,omitempty" yaml:"externalDocs,omitempty"`
 		OperationID  string               `json:"operationId,omitempty" yaml:"operationId,omitempty"`
-		Parameters   []ParameterOrRef     `json:"parameters,omitempty" yaml:"parameters,omitempty"`
+		Parameters   ParameterOrRefs      `json:"parameters,omitempty" yaml:"parameters,omitempty"`
 		RequestBody  *RequestBodyOrRef    `json:"requestBody,omitempty" yaml:"requestBody,omitempty"`
 		Responses    Responses            `json:"responses" yaml:"responses"`
 		Callbacks    NamedCallbackOrRefs  `json:"callbacks,omitempty" yaml:"callbacks,omitempty"`
@@ -36,6 +36,7 @@ type (
 	}
 
 	NamedParameterOrRefs map[string]ParameterOrRef
+	ParameterOrRefs      []ParameterOrRef
 	ParameterOrRef       = ItemOrRef[Parameter]
 
 	Parameter struct {
