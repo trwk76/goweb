@@ -56,7 +56,7 @@ func (p *path) Path() string {
 	return "/"
 }
 
-func (p *path) Named(name string, errHandler ErrorHandler) Path {
+func (p *path) NamedPath(name string, errHandler ErrorHandler) Path {
 	if strings.Contains(name, "/") {
 		panic(fmt.Errorf("path name must not contain '/'"))
 	} else if len(name) < 1 {
@@ -83,7 +83,7 @@ func (p *path) Named(name string, errHandler ErrorHandler) Path {
 	return res
 }
 
-func (p *path) Param(name string, isPath bool, errHandler ErrorHandler) Path {
+func (p *path) ParamPath(name string, isPath bool, errHandler ErrorHandler) Path {
 	if !token.IsIdentifier(name) {
 		panic(fmt.Errorf("'%s' is not a valid identifier", name))
 	} else if p.hasParam(name) {
@@ -123,8 +123,8 @@ func (p *path) Handle(meth string, hdl Handler) {
 type (
 	Path interface {
 		Path() string
-		Named(name string, errHandler ErrorHandler) Path
-		Param(name string, path bool, errHandler ErrorHandler) Path
+		NamedPath(name string, errHandler ErrorHandler) Path
+		ParamPath(name string, path bool, errHandler ErrorHandler) Path
 		Handle(meth string, hdl Handler)
 	}
 

@@ -144,7 +144,7 @@ func (a *API) SchemaOrRefOf(t reflect.Type, key string, mediaType MediaType) spe
 			}
 		}
 
-		return spec.SchemaOrRef{Ref: spec.Ref("schemas", key)}
+		return spec.SchemaOrRef{Ref: spec.Ref("schemas", skey)}
 	}
 
 	return spec.SchemaOrRef{Item: res}

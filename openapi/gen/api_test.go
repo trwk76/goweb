@@ -17,7 +17,7 @@ func TestAPI(t *testing.T) {
 
 	api.APIKeySecurity(keyAuth, "API key based authentication", "apikey", spec.SecurityInCookie)
 
-	paramID := api.ParamOrRef("entityID", gen.ParamFor[EntityID](api, "id", spec.ParameterPath, func(s *spec.Parameter) {
+	paramID := api.ParamOrRef("entityID", gen.ParamFor(api, "id", spec.ParameterPath, func(s *spec.Parameter) {
 		s.Description = "Entity identifier."
 	}, gen.Examples[EntityID]{
 		"System": {
@@ -41,12 +41,12 @@ func TestAPI(t *testing.T) {
 				OperationID: "Fetch",
 				Summary:     "Fetch user",
 				Description: "Fetches a user by its ID.",
-				Responses:   spec.Responses{
-					"200": api.ResponseOrRef("", gen.ResponseFor(api, "Information about the user.", nil, mtypes, gen.Examples[UserInfo] {
+				Responses: spec.Responses{
+					"200": api.ResponseOrRef("", gen.ResponseFor(api, "Information about the user.", nil, mtypes, gen.Examples[UserInfo]{
 						"System": {
 							Summary:     "System",
 							Description: "System user information",
-							Value:       UserInfo{
+							Value: UserInfo{
 								ID:    EntityID(1),
 								Name:  "System",
 								Email: "",

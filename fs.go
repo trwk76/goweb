@@ -10,7 +10,7 @@ import (
 )
 
 func FS(p Path, f fs.FS, errHandler ErrorHandler) {
-	p = p.Param("path", true, errHandler)
+	p = p.ParamPath("path", true, errHandler)
 	GET_HEAD(p, func(ctx *Context) (Response, error) {
 		path := ctx.Param("path")
 		return serveFile(ctx, f, path)
