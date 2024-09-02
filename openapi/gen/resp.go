@@ -7,11 +7,11 @@ import (
 	"github.com/trwk76/goweb/openapi/spec"
 )
 
-func RespFor[T any](a *API, desc string, setup func(item *spec.Response)) spec.ResponseOrRef {
+func RespFor[T any](a *API, desc string, setup SetupFunc[spec.Response]) spec.ResponseOrRef {
 	return RespOf(a, reflect.TypeFor[T](), desc, setup)
 }
 
-func RespOf(a *API, t reflect.Type, desc string, setup func(item *spec.Response)) spec.ResponseOrRef {
+func RespOf(a *API, t reflect.Type, desc string, setup SetupFunc[spec.Response]) spec.ResponseOrRef {
 	sch := a.sch.SchemaOrRefOf(t)
 
 	item := spec.Response{
@@ -24,7 +24,7 @@ func RespOf(a *API, t reflect.Type, desc string, setup func(item *spec.Response)
 	}
 
 	if setup != nil {
-		setup(&item)
+		setup(a, &item)
 	}
 
 	return spec.ResponseOrRef{Item: item}

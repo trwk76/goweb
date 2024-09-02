@@ -6,11 +6,11 @@ import (
 	"github.com/trwk76/goweb/openapi/spec"
 )
 
-func ParamFor[T any](a *API, name string, in spec.ParameterIn, setup func(item *spec.Parameter)) spec.ParameterOrRef {
+func ParamFor[T any](a *API, name string, in spec.ParameterIn, setup SetupFunc[spec.Parameter]) spec.ParameterOrRef {
 	return ParamOf(a, reflect.TypeFor[T](), name, in, setup)
 }
 
-func ParamOf(a *API, t reflect.Type, name string, in spec.ParameterIn, setup func(item *spec.Parameter)) spec.ParameterOrRef {
+func ParamOf(a *API, t reflect.Type, name string, in spec.ParameterIn, setup SetupFunc[spec.Parameter]) spec.ParameterOrRef {
 	sch := SchemaOf(t, &a.sch)
 
 	checkSimpleSchema(sch)
@@ -22,7 +22,7 @@ func ParamOf(a *API, t reflect.Type, name string, in spec.ParameterIn, setup fun
 	}
 
 	if setup != nil {
-		setup(&item)
+		setup(a, &item)
 	}
 
 	return spec.ParameterOrRef{Item: item}

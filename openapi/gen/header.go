@@ -6,11 +6,11 @@ import (
 	"github.com/trwk76/goweb/openapi/spec"
 )
 
-func HeaderFor[T any](a *API, setup func(item *spec.Header)) spec.HeaderOrRef {
+func HeaderFor[T any](a *API, setup SetupFunc[spec.Header]) spec.HeaderOrRef {
 	return HeaderOf(a, reflect.TypeFor[T](), setup)
 }
 
-func HeaderOf(a *API, t reflect.Type, setup func(item *spec.Header)) spec.HeaderOrRef {
+func HeaderOf(a *API, t reflect.Type, setup SetupFunc[spec.Header]) spec.HeaderOrRef {
 	sch := SchemaOf(t, &a.sch)
 
 	checkSimpleSchema(sch)
@@ -20,7 +20,7 @@ func HeaderOf(a *API, t reflect.Type, setup func(item *spec.Header)) spec.Header
 	}
 
 	if setup != nil {
-		setup(&item)
+		setup(a, &item)
 	}
 
 	return spec.HeaderOrRef{Item: item}

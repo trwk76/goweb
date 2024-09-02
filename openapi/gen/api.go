@@ -97,4 +97,6 @@ type (
 		secs   Securities
 		tags   Tags
 	}
+
+	SetupFunc[T any] func(a *API, item *T)
 )

@@ -7,11 +7,11 @@ import (
 	"github.com/trwk76/goweb/openapi/spec"
 )
 
-func ReqBodyFor[T any](a *API, setup func(item *spec.RequestBody)) spec.RequestBodyOrRef {
+func ReqBodyFor[T any](a *API, setup SetupFunc[spec.RequestBody]) spec.RequestBodyOrRef {
 	return ReqBodyOf(a, reflect.TypeFor[T](), setup)
 }
 
-func ReqBodyOf(a *API, t reflect.Type, setup func(item *spec.RequestBody)) spec.RequestBodyOrRef {
+func ReqBodyOf(a *API, t reflect.Type, setup SetupFunc[spec.RequestBody]) spec.RequestBodyOrRef {
 	sch := a.sch.SchemaOrRefOf(t)
 
 	item := spec.RequestBody{
@@ -24,7 +24,7 @@ func ReqBodyOf(a *API, t reflect.Type, setup func(item *spec.RequestBody)) spec.
 	}
 
 	if setup != nil {
-		setup(&item)
+		setup(a, &item)
 	}
 
 	return spec.RequestBodyOrRef{Item: item}
