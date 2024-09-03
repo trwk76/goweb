@@ -37,6 +37,10 @@ func SchemaTypeSnakeCase(t reflect.Type) string {
 	return strcase.ToSnake(t.Name())
 }
 
+func SchemaOrRefFor[T any](a *API) spec.SchemaOrRef {
+	return a.sch.SchemaOrRefOf(reflect.TypeFor[T]())
+}
+
 func (m *Schemas) SchemaOrRefOf(t reflect.Type) spec.SchemaOrRef {
 	var res spec.SchemaOrRef
 	var ptr bool = false

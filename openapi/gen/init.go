@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"text/template"
 )
@@ -23,7 +24,7 @@ func genInit(dir string, pkgName string, a *API) {
 	sort.Slice(init, func(i, j int) bool { return init[i] < init[j] })
 
 	for idx, opID := range init {
-		init[idx] = fmt.Sprintf("\tm.HandleFunc(%s, %s)", a.ops[opID], opID)
+		init[idx] = fmt.Sprintf("\tm.HandleFunc(%s, %s)", strconv.Quote(a.ops[opID]), opID)
 	}
 
 	file, err := os.Create(path)

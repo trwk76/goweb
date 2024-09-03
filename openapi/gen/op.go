@@ -44,7 +44,7 @@ func (p *PathItem) op(operationID string, method string, acceptBody bool, setup 
 		panic(fmt.Errorf("operationId '%s' redefined", operationID))
 	}
 
-	p.api.ops[operationID] = fmt.Sprintf("%s %s", method, p.pth)
+	p.api.ops[operationID] = fmt.Sprintf("%s %s%s", method, p.api.path, p.pth)
 
 	item := &spec.Operation{
 		OperationID: operationID,

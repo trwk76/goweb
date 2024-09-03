@@ -4,6 +4,7 @@ package {{ .PkgName }}
 
 import (
 	"bytes"
+	_ "embed"
 	"net/http"
 	"time"
 
@@ -19,7 +20,7 @@ func Init(m *http.ServeMux) swaggerui.API {
 		http.ServeContent(w, r, "openapi.yaml", time.Time{}, bytes.NewReader(yamlSpec))
 	})
 
-	{{ .Init }}
+{{ .Init }}
 
 	return swaggerui.API{
 		Name: "{{ .Title }}",
