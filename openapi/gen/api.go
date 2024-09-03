@@ -1,6 +1,7 @@
 package gen
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -20,6 +21,7 @@ func New(path string, info spec.Info, sec spec.SecurityRequirements, typeKeyFunc
 		hdrs:   make(Headers),
 		secs:   make(Securities),
 		tags:   make(Tags, 0),
+		ops:    make(map[string]string),
 	}
 }
 
@@ -70,6 +72,16 @@ func (a *API) Spec() spec.OpenAPI {
 	}
 }
 
+func (a *API) Generate(dir string, pkgName string) {
+	if err := os.MkdirAll(dir, os.FileMode(0777)); err != nil {
+		panic(fmt.Errorf("error creating target directory '%s': %s", dir, err.Error()))
+	}
+
+	WriteSpecTo(dir, a.Spec())
+
+	genInit(dir, pkgName, a)
+}
+
 func WriteSpecTo(dir string, s spec.OpenAPI) {
 	if err := os.MkdirAll(dir, os.FileMode(0777)); err != nil {
 		panic(err)
@@ -97,6 +109,7 @@ type (
 		hdrs   Headers
 		secs   Securities
 		tags   Tags
+		ops    map[string]string
 	}
 
 	SetupFunc[T any] func(a *API, item *T)

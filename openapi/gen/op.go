@@ -40,6 +40,12 @@ func (p *PathItem) TRACE(operationID string, setup SetupFunc[spec.Operation]) {
 }
 
 func (p *PathItem) op(operationID string, method string, acceptBody bool, setup SetupFunc[spec.Operation]) *spec.Operation {
+	if _, ex := p.api.ops[operationID]; ex {
+		panic(fmt.Errorf("operationId '%s' redefined", operationID))
+	}
+
+	p.api.ops[operationID] = fmt.Sprintf("%s %s", method, p.pth)
+
 	item := &spec.Operation{
 		OperationID: operationID,
 		Responses:   make(spec.Responses),

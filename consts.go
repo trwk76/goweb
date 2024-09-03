@@ -9,4 +9,5 @@ const (
 
 const (
 	ContentTypeJSON string = "application/json"
+	ContentTypeText string = "text/plain"
 )
