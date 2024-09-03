@@ -16,9 +16,7 @@ func ReqBodyOf(a *API, t reflect.Type, setup SetupFunc[spec.RequestBody]) spec.R
 
 	item := spec.RequestBody{
 		Content: spec.MediaTypes{
-			goweb.ContentTypeJSON: spec.MediaType{
-				Schema: &sch,
-			},
+			goweb.ContentTypeJSON: &spec.MediaType{Schema: &sch},
 		},
 		Required: true,
 	}

@@ -55,6 +55,7 @@ func (a *API) Spec() spec.OpenAPI {
 	return spec.OpenAPI{
 		OpenAPI: spec.Version,
 		Info:    a.info,
+		Paths:   a.paths,
 		Servers: []spec.Server{{URL: a.path, Description: "Current server."}},
 		Components: &spec.Components{
 			Schemas:         a.sch.spec(),

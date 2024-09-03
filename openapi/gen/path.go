@@ -7,20 +7,20 @@ import (
 	"github.com/trwk76/goweb/openapi/spec"
 )
 
-func (a *API) NamedPath(name string) *PathItem {
-	return newNamedPathItem(a, nil, name)
+func (a *API) NamedPath(name string, setup SetupFunc[PathItem]) {
+	setup(a, newNamedPathItem(a, nil, name))
 }
 
-func (a *API) ParamPath(param spec.ParameterOrRef) *PathItem {
-	return newParamPathItem(a, nil, param)
+func (a *API) ParamPath(param spec.ParameterOrRef, setup SetupFunc[PathItem]) {
+	setup(a, newParamPathItem(a, nil, param))
 }
 
-func (p *PathItem) NamedPath(name string) *PathItem {
-	return newNamedPathItem(p.api, p.par, name)
+func (p *PathItem) NamedPath(name string, setup SetupFunc[PathItem]) {
+	setup(p.api, newNamedPathItem(p.api, p.par, name))
 }
 
-func (p *PathItem) ParamPath(param spec.ParameterOrRef) *PathItem {
-	return newParamPathItem(p.api, p.par, param)
+func (p *PathItem) ParamPath(param spec.ParameterOrRef, setup SetupFunc[PathItem]) {
+	setup(p.api, newParamPathItem(p.api, p.par, param))
 }
 
 type (

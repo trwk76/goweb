@@ -17,9 +17,7 @@ func RespOf(a *API, t reflect.Type, desc string, setup SetupFunc[spec.Response])
 	item := spec.Response{
 		Description: desc,
 		Content: spec.MediaTypes{
-			goweb.ContentTypeJSON: spec.MediaType{
-				Schema: &sch,
-			},
+			goweb.ContentTypeJSON: &spec.MediaType{Schema: &sch},
 		},
 	}
 

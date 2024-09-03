@@ -64,7 +64,7 @@ type (
 		Examples        NamedExampleOrRefs `json:"examples,omitempty" yaml:"examples,omitempty"`
 	}
 
-	MediaTypes map[string]MediaType
+	MediaTypes map[string]*MediaType
 
 	MediaType struct {
 		Schema   *SchemaOrRef       `json:"schema,omitempty" yaml:"schema,omitempty"`
