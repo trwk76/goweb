@@ -1,6 +1,8 @@
 package loc
 
-import "time"
+import "strconv"
+
+var Default Loc = defLoc{}
 
 type (
 	Loc interface {
@@ -8,16 +10,44 @@ type (
 		FormatInt(v int64) string
 		FormatUint(v uint64) string
 		FormatFloat(v float64) string
-		FormatDate(v time.Time) string
-		FormatTime(v time.Time) string
-		FormatDateTime(v time.Time) string
 
 		ParseBool(v string) (bool, error)
 		ParseInt(v string) (int64, error)
 		ParseUint(v string) (uint64, error)
 		ParseFloat(v string) (float64, error)
-		ParseDate(v string) (time.Time, error)
-		ParseTime(v string) (time.Time, error)
-		ParseDateTime(v string) (time.Time, error)
 	}
+
+	defLoc struct{}
 )
+
+func (defLoc) FormatBool(v bool) string {
+	return strconv.FormatBool(v)
+}
+
+func (defLoc) FormatInt(v int64) string {
+	return strconv.FormatInt(v, 10)
+}
+
+func (defLoc) FormatUint(v uint64) string {
+	return strconv.FormatUint(v, 10)
+}
+
+func (defLoc) FormatFloat(v float64) string {
+	return strconv.FormatFloat(v, 'g', -1, 64)
+}
+
+func (defLoc) ParseBool(v string) (bool, error) {
+	return strconv.ParseBool(v)
+}
+
+func (defLoc) ParseInt(v string) (int64, error) {
+	return strconv.ParseInt(v, 10, 64)
+}
+
+func (defLoc) ParseUint(v string) (uint64, error) {
+	return strconv.ParseUint(v, 10, 64)
+}
+
+func (defLoc) ParseFloat(v string) (float64, error) {
+	return strconv.ParseFloat(v, 64)
+}
