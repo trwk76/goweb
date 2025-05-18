@@ -1,6 +1,10 @@
 package bind
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/trwk76/goweb/loc"
+)
 
 type (
 	BindableCtx[C any] interface {
@@ -9,5 +13,13 @@ type (
 
 	Bindable interface {
 		Bind(r *http.Request) error
+	}
+
+	URLUnmarshalerCtx[C any] interface {
+		UnmarshalURLCtx(ctx any, l loc.Loc, v string) error
+	}
+
+	URLUnmarshaler interface {
+		UnmarshalURL(l loc.Loc, v string) error
 	}
 )

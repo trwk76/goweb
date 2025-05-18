@@ -3,6 +3,7 @@ package bind
 import (
 	"net/http"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/trwk76/goweb/check"
@@ -43,9 +44,10 @@ func BindCtx[C any](ctx C, l loc.Loc, r *http.Request, dest any) error {
 
 			switch tag.Src {
 			case TagSrcBody:
+
 			case TagSrcCookie:
 				if cook, err := r.Cookie(tag.Name); cook != nil && err == nil {
-					if err := loc.UnmarshalText(l, cook.Value, ftgt.Interface()); err != nil {
+					if err := unmarshalValue(ctx, l, cook.Value, ftgt); err != nil {
 						errs.Add("cookie/"+tag.Name, err)
 					} else if set {
 						fdst.Set(ftgt)
@@ -54,14 +56,23 @@ func BindCtx[C any](ctx C, l loc.Loc, r *http.Request, dest any) error {
 					errs.Add("cookie/"+tag.Name, check.RequiredError{})
 				}
 			case TagSrcHeader:
+				if vals := r.Header.Values(tag.Name); len(vals) > 0 {
+					if err := unmarshalValues(ctx, l, tag, vals, ftgt); err != nil {
+						errs.Add("header/"+tag.Name, err)
+					} else if set {
+						fdst.Set(ftgt)
+					}
+				} else if !tag.Opt {
+					errs.Add("header/"+tag.Name, check.RequiredError{})
+				}
 			case TagSrcPath:
 				if val := r.PathValue(tag.Name); val != "" {
-					if err := loc.UnmarshalText(l, val, ftgt.Interface()); err != nil {
+					if err := unmarshalValue(ctx, l, val, ftgt); err != nil {
 						errs.Add("path/"+tag.Name, err)
 					} else if set {
 						fdst.Set(ftgt)
 					}
-				} else {
+				} else if !tag.Opt {
 					errs.Add("path/"+tag.Name, check.RequiredError{})
 				}
 			case TagSrcQuery:
@@ -81,6 +92,100 @@ func BindCtx[C any](ctx C, l loc.Loc, r *http.Request, dest any) error {
 	return errs.Err()
 }
 
-func Bind(r *http.Request, dest any) error {
-	return BindCtx[any](nil, r, dest)
+func Bind(l loc.Loc, r *http.Request, dest any) error {
+	return BindCtx[any](nil, l, r, dest)
+}
+
+func unmarshalValues[C any](ctx C, l loc.Loc, tag Tag, vals []string, dst reflect.Value) error {
+	switch tag.Del {
+	case TagDelComma, TagDelSpace, TagDelPipe:
+		vals = splitDeclVals(vals, string(tag.Del))
+	}
+
+	switch dst.Kind() {
+	case reflect.Array:
+		if len(vals) < dst.Len() {
+			return check.ValueCountError{Expected: dst.Len(), Actual: len(vals)}
+		}
+
+		errs := check.NewFieldErrors()
+		dst = dst.Elem()
+
+		for idx, val := range vals {
+			tgt := dst.Index(idx).Addr()
+			set := false
+
+			if tgt.Kind() == reflect.Pointer {
+				tgt = reflect.New(tgt.Type().Elem())
+				set = true
+			}
+
+			// unmarshalValue will check the value and return an error if it is not valid
+			if err := unmarshalValue(ctx, l, val, tgt); err != nil {
+				errs.Add(strconv.Itoa(idx), err)
+			} else if set {
+				dst.Index(idx).Set(tgt)
+			}
+		}
+
+		return errs.Err()
+	case reflect.Slice:
+		errs := check.NewFieldErrors()
+		dst = dst.Elem()
+
+		if dst.Len() < len(vals) {
+			// grow slice to accommodate all values
+			if dst.Cap() < len(vals) {
+				dst.Grow(len(vals))
+			}
+
+			dst.SetLen(len(vals))
+		}
+
+		for idx, val := range vals {
+			tgt := dst.Index(idx).Addr()
+			set := false
+
+			if tgt.Kind() == reflect.Pointer {
+				tgt = reflect.New(tgt.Type().Elem())
+				set = true
+			}
+
+			// unmarshalValue will check the value and return an error if it is not valid
+			if err := unmarshalValue(ctx, l, val, tgt); err != nil {
+				errs.Add(strconv.Itoa(idx), err)
+			} else if set {
+				dst.Index(idx).Set(tgt)
+			}
+		}
+
+		return errs.Err()
+	}
+
+	// dst is neither a slice nor an array, so use first value only
+	return unmarshalValue(ctx, l, vals[0], dst)
+}
+
+func unmarshalValue[C any](ctx C, l loc.Loc, val string, dst reflect.Value) error {
+	if um, ok := dst.Interface().(URLUnmarshalerCtx[C]); ok {
+		return um.UnmarshalURLCtx(ctx, l, val)
+	} else if um, ok := dst.Interface().(URLUnmarshaler); ok {
+		return um.UnmarshalURL(l, val)
+	}
+
+	if err := loc.UnmarshalText(l, val, dst.Addr().Interface()); err != nil {
+		return err
+	}
+
+	return check.CheckCtx(ctx, dst.Elem().Interface())
+}
+
+func splitDeclVals(vals []string, delim string) []string {
+	res := make([]string, 0, len(vals))
+
+	for _, val := range vals {
+		res = append(res, strings.Split(val, delim)...)
+	}
+
+	return res
 }
