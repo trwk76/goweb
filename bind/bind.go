@@ -10,7 +10,11 @@ import (
 	"github.com/trwk76/goweb/loc"
 )
 
-func BindCtx[C any](ctx C, l loc.Loc, r *http.Request, dest any) error {
+// WithCtx binds the request to the destination structure.
+// It uses the "bind" tag to determine the source of the value and potential options. Please refer to the Tag struct for more details.
+// dest must be a valid pointer to a structure otherwise the function will panic.
+// The function will return an error if the binding or checks fail.
+func WithCtx[C any](ctx C, l loc.Loc, r *http.Request, dest any) error {
 	if b, ok := dest.(BindableCtx[C]); ok {
 		return b.BindCtx(ctx, r)
 	} else if b, ok := dest.(Bindable); ok {
@@ -90,10 +94,6 @@ func BindCtx[C any](ctx C, l loc.Loc, r *http.Request, dest any) error {
 	}
 
 	return errs.Err()
-}
-
-func Bind(l loc.Loc, r *http.Request, dest any) error {
-	return BindCtx[any](nil, l, r, dest)
 }
 
 func unmarshalValues[C any](ctx C, l loc.Loc, tag Tag, vals []string, dst reflect.Value) error {
@@ -177,7 +177,7 @@ func unmarshalValue[C any](ctx C, l loc.Loc, val string, dst reflect.Value) erro
 		return err
 	}
 
-	return check.CheckCtx(ctx, dst.Elem().Interface())
+	return check.WithCtx(ctx, dst.Elem().Interface())
 }
 
 func splitDeclVals(vals []string, delim string) []string {

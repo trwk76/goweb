@@ -1,6 +1,7 @@
 package check
 
-func CheckCtx[C any](ctx C, value any) error {
+// WithCtx checks the value using the given context by invoking the CheckableCtx or Checkable interfaces if the value implements them, otherwise returns nil.
+func WithCtx[C any](ctx C, value any) error {
 	if cc, ok := value.(CheckableCtx[C]); ok {
 		return cc.CheckCtx(ctx)
 	} else if c, ok := value.(Checkable); ok {
@@ -10,6 +11,7 @@ func CheckCtx[C any](ctx C, value any) error {
 	return nil
 }
 
-func Check(value any) error {
-	return CheckCtx[any](nil, value)
+// With checks the value using the given context by invoking the CheckableCtx or Checkable interfaces if the value implements them, otherwise returns nil.
+func With(value any) error {
+	return WithCtx[any](nil, value)
 }

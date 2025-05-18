@@ -2,9 +2,11 @@ package loc
 
 import "strconv"
 
+// Default is the default implementation of the Loc interface using the standard functions.
 var Default Loc = defLoc{}
 
 type (
+	// Loc is an interface that defines methods for formatting and parsing various types in a specific localization.
 	Loc interface {
 		FormatBool(v bool) string
 		FormatInt(v int64) string

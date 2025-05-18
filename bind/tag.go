@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// MustParseTag parses val as "bind" tag and panics if it fails.
 func MustParseTag(typ reflect.Type, fld reflect.StructField, val string) Tag {
 	res, err := ParseTag(val)
 	if err != nil {
@@ -15,6 +16,7 @@ func MustParseTag(typ reflect.Type, fld reflect.StructField, val string) Tag {
 	return res
 }
 
+// ParseTag parses the val as a "bind" tag and returns a Tag struct or an error.
 func ParseTag(s string) (Tag, error) {
 	var res Tag
 
@@ -67,6 +69,13 @@ func ParseTag(s string) (Tag, error) {
 }
 
 type (
+	// Tag represents a binding tag for a field in a struct.
+	// It contains the source of the binding (Src), the name of the field (Name),
+	// whether the field is optional (Opt), and the delimiter for splitting values (Del).
+	// The Src field indicates where the value should be bound from (e.g., body, cookie, header, path, query).
+	// The Name field specifies the name of the field in the source.
+	// The Opt field indicates if the field is optional (true) or required (false).
+	// The Del field specifies the delimiter used to split multiple values in the source.
 	Tag struct {
 		Src  TagSrc
 		Name string
@@ -74,21 +83,33 @@ type (
 		Del  TagDel
 	}
 
+	// TagSrc represents the source of the binding (e.g., body, cookie, header, path, query).
 	TagSrc string
+
+	// TagDel represents the delimiter used to split multiple values in the source (e.g., comma, space, pipe).
 	TagDel string
 )
 
 const (
-	TagSrcBody   TagSrc = "body"
+	// TagSrcBody represents the source of the binding as the body of a request.
+	TagSrcBody TagSrc = "body"
+	// TagSrcCookie represents the source of the binding as one named cookie of a request.
 	TagSrcCookie TagSrc = "cookie"
+	// TagSrcHeader represents the source of the binding as one named header of a request.
 	TagSrcHeader TagSrc = "header"
-	TagSrcPath   TagSrc = "path"
-	TagSrcQuery  TagSrc = "query"
+	// TagSrcPath represents the source of the binding as one named path item of a request.
+	TagSrcPath TagSrc = "path"
+	// TagSrcQuery represents the source of the binding as one named query item of a request.
+	TagSrcQuery TagSrc = "query"
 )
 
 const (
-	TagDelNone  TagDel = ""
+	// TagDelNone represents no delimiter for splitting values.
+	TagDelNone TagDel = ""
+	// TagDelComma represents a comma (,) delimiter to be used for splitting multiple values.
 	TagDelComma TagDel = ","
+	// TagDelSpace represents a space ( ) delimiter to be used for splitting multiple values.
 	TagDelSpace TagDel = " "
-	TagDelPipe  TagDel = "|"
+	// TagDelPipe represents a comma (|) delimiter to be used for splitting multiple values.
+	TagDelPipe TagDel = "|"
 )
