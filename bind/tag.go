@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/trwk76/goweb/content/form"
 )
 
 // MustParseTag parses val as "bind" tag and panics if it fails.
@@ -20,74 +22,44 @@ func MustParseTag(typ reflect.Type, fld reflect.StructField, val string) Tag {
 func ParseTag(s string) (Tag, error) {
 	var res Tag
 
-	loc, opts, ok := strings.Cut(s, ",")
-	if loc == "body" {
+	if strings.HasPrefix(s, "body") {
 		res.Src = TagSrcBody
-		res.Name = loc
+	} else if strings.HasPrefix(s, "cookie/") {
+		res.Src = TagSrcCookie
+		s = strings.TrimSuffix(s, "cookie/")
+	} else if strings.HasPrefix(s, "header/") {
+		res.Src = TagSrcHeader
+		s = strings.TrimSuffix(s, "header/")
+	} else if strings.HasPrefix(s, "path/") {
+		res.Src = TagSrcPath
+		s = strings.TrimSuffix(s, "path/")
+	} else if strings.HasPrefix(s, "query/") {
+		res.Src = TagSrcQuery
+		s = strings.TrimSuffix(s, "query/")
 	} else {
-		src, name, ok := strings.Cut(loc, "/")
-		if !ok {
-			return res, fmt.Errorf("invalid bind location %s", loc)
-		}
-
-		switch src {
-		case "cookie":
-			res.Src = TagSrcCookie
-			res.Name = name
-		case "header":
-			res.Src = TagSrcHeader
-			res.Name = name
-		case "path":
-			res.Src = TagSrcPath
-			res.Name = name
-		case "query":
-			res.Src = TagSrcQuery
-			res.Name = name
-		default:
-			return res, fmt.Errorf("unsupported bind source %s", src)
-		}
+		return res, fmt.Errorf("unsupported bind source in tag %s", s)
 	}
 
-	if ok {
-		for _, opt := range strings.Split(opts, ",") {
-			switch opt {
-			case "opt":
-				res.Opt = true
-			case "comma":
-				res.Del = TagDelComma
-			case "space":
-				res.Del = TagDelSpace
-			case "pipe":
-				res.Del = TagDelPipe
-			default:
-				return res, fmt.Errorf("unsupported option %s", opt)
-			}
-		}
+	ft, err := form.ParseTag(s)
+	if err != nil {
+		return res, err
 	}
 
+	res.Tag = ft
 	return res, nil
 }
 
 type (
 	// Tag represents a binding tag for a field in a struct.
-	// It contains the source of the binding (Src), the name of the field (Name),
-	// whether the field is optional (Opt), and the delimiter for splitting values (Del).
+	// It contains the source of the binding (Src) in addition to the form tag,
 	// The Src field indicates where the value should be bound from (e.g., body, cookie, header, path, query).
-	// The Name field specifies the name of the field in the source.
-	// The Opt field indicates if the field is optional (true) or required (false).
-	// The Del field specifies the delimiter used to split multiple values in the source.
 	Tag struct {
-		Src  TagSrc
-		Name string
-		Opt  bool
-		Del  TagDel
+		form.Tag
+		Src TagSrc
 	}
 
 	// TagSrc represents the source of the binding (e.g., body, cookie, header, path, query).
 	TagSrc string
-
-	// TagDel represents the delimiter used to split multiple values in the source (e.g., comma, space, pipe).
-	TagDel string
 )
 
 const (
@@ -101,15 +73,4 @@ const (
 	TagSrcPath TagSrc = "path"
 	// TagSrcQuery represents the source of the binding as one named query item of a request.
 	TagSrcQuery TagSrc = "query"
-)
-
-const (
-	// TagDelNone represents no delimiter for splitting values.
-	TagDelNone TagDel = ""
-	// TagDelComma represents a comma (,) delimiter to be used for splitting multiple values.
-	TagDelComma TagDel = ","
-	// TagDelSpace represents a space ( ) delimiter to be used for splitting multiple values.
-	TagDelSpace TagDel = " "
-	// TagDelPipe represents a comma (|) delimiter to be used for splitting multiple values.
-	TagDelPipe TagDel = "|"
 )
